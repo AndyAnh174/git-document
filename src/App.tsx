@@ -21,7 +21,7 @@ const App = () => {
       <nav className="navbar bg-base-200">
         <div className="flex-1">
           <NavLink to="/" className="btn btn-ghost normal-case text-xl">
-            Git Playground
+            Git Document
           </NavLink>
         </div>
         <div className="flex-none gap-2">
