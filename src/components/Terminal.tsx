@@ -9,6 +9,10 @@ interface TerminalProps {
   output: string;
 }
 
+interface ITheme {
+  selection: string;
+}
+
 const Terminal = ({ onCommand, isProcessing, output }: TerminalProps) => {
   const terminalRef = useRef<HTMLDivElement>(null)
   const xtermRef = useRef<XTerm>()
@@ -25,7 +29,6 @@ const Terminal = ({ onCommand, isProcessing, output }: TerminalProps) => {
         background: '#2A303C',
         foreground: '#A6ADBB',
         cursor: '#A6ADBB',
-        selection: '#444B5A',
       },
       fontSize: 14,
       fontFamily: 'Menlo, Monaco, "Courier New", monospace',

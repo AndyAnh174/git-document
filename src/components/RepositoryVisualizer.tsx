@@ -114,25 +114,21 @@ const RepositoryVisualizer = ({ gitState }: RepositoryVisualizerProps) => {
       .selectAll('g')
       .data(nodes)
       .join('g')
-      .attr('class', 'git-node')
-      .call(d3.drag<SVGGElement, Node>()
-        .on('start', dragstarted)
-        .on('drag', dragged)
-        .on('end', dragended));
+      .attr('class', 'git-node');
 
     // Thêm hình tròn cho node
     node.append('circle')
       .attr('r', 24)
-      .attr('fill', d => getBranchColor(d.branch))
+      .attr('fill', (d: Node) => getBranchColor(d.branch))
       .attr('stroke', '#fff')
       .attr('stroke-width', 3)
       .attr('class', 'transition-all duration-200')
-      .on('mouseover', function() {
+      .on('mouseover', function(this: SVGCircleElement) {
         d3.select(this)
           .attr('r', 28)
           .attr('stroke-width', 4);
       })
-      .on('mouseout', function() {
+      .on('mouseout', function(this: SVGCircleElement) {
         d3.select(this)
           .attr('r', 24)
           .attr('stroke-width', 3);
@@ -143,26 +139,26 @@ const RepositoryVisualizer = ({ gitState }: RepositoryVisualizerProps) => {
       .attr('dy', -30)
       .attr('text-anchor', 'middle')
       .attr('class', 'text-xs font-mono')
-      .text(d => d.id.slice(0, 7));
+      .text((d: Node) => d.id.slice(0, 7));
 
     // Thêm commit message
     node.append('text')
       .attr('dy', 40)
       .attr('text-anchor', 'middle')
       .attr('class', 'text-sm font-medium')
-      .text(d => d.message.slice(0, 20));
+      .text((d: Node) => d.message.slice(0, 20));
 
     // Thêm timestamp
     node.append('text')
       .attr('dy', 60)
       .attr('text-anchor', 'middle')
       .attr('class', 'text-xs text-base-content/60')
-      .text(d => new Date(d.timestamp).toLocaleTimeString());
+      .text((d: Node) => new Date(d.timestamp).toLocaleTimeString());
 
     // Thêm branch tag
     node.append('g')
       .attr('transform', 'translate(0, -45)')
-      .each(function(d) {
+      .each(function(this: SVGGElement, d: Node) {
         const branchTag = d3.select(this);
         const branch = gitState.branches.find(b => b.commits.includes(d.id));
         if (branch) {
@@ -191,31 +187,15 @@ const RepositoryVisualizer = ({ gitState }: RepositoryVisualizerProps) => {
         const targetNode = nodes.find(n => n.id === d.target);
         if (!sourceNode || !targetNode) return '';
         
-        return `M${sourceNode.x},${sourceNode.y}
-                C${sourceNode.x},${(sourceNode.y + targetNode.y) / 2}
-                 ${targetNode.x},${(sourceNode.y + targetNode.y) / 2}
-                 ${targetNode.x},${targetNode.y}`;
+        const pathData = `M${sourceNode.x},${sourceNode.y ?? 0}
+                         C${sourceNode.x},${((sourceNode.y ?? 0) + (targetNode.y ?? 0)) / 2}
+                         ${targetNode.x},${((sourceNode.y ?? 0) + (targetNode.y ?? 0)) / 2}
+                         ${targetNode.x},${targetNode.y ?? 0}`;
+        return pathData;
       });
 
-      node.attr('transform', d => `translate(${d.x},${d.y})`);
+      node.attr('transform', (d: Node) => `translate(${d.x},${d.y})`);
     });
-
-    function dragstarted(event: d3.D3DragEvent<SVGGElement, Node, Node>) {
-      if (!event.active) simulation.alphaTarget(0.3).restart();
-      event.subject.fx = event.subject.x;
-      event.subject.fy = event.subject.y;
-    }
-
-    function dragged(event: d3.D3DragEvent<SVGGElement, Node, Node>) {
-      event.subject.fx = event.x;
-      event.subject.fy = event.y;
-    }
-
-    function dragended(event: d3.D3DragEvent<SVGGElement, Node, Node>) {
-      if (!event.active) simulation.alphaTarget(0);
-      event.subject.fx = null;
-      event.subject.fy = null;
-    }
 
     return () => {
       simulation.stop();
